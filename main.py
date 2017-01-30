@@ -15,76 +15,112 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
+import re
 
-# html boilerplate for the top of every page
-page_header = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Signup</title>
-    <style type="text/css">
-        .error {
-            color: red;
-        }
-    </style>
-</head>
-<body>
-    <h1>
-        User Signup
-    </h1>
-"""
+def buildPage(content):
+    # html boilerplate for the top of every page
+    page_header = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>User Signup</title>
+        <style type="text/css">
+            .error {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>
+            User Signup
+        </h1>
+    """
+    page_body=content
+    # html boilerplate for the bottom of every page
+    page_footer = """
+    </body>
+    </html>
+    """
+    return page_header + page_body + page_footer
 
-# html boilerplate for the bottom of every page
-page_footer = """
-</body>
-</html>
-"""
+# global escape function
+def escapeHtml(input):
+    return cgi.escape(input, quote=True)
+
+
+username_reg_ex = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def valid_username(username):
+    return username and username_reg_ex.match(username)
+
+
+password_reg_ex = re.compile(r"^.{3,20}$")
+def valid_password(password):
+    return password and password_reg_ex.match(password)
+
+
+email_reg_ex = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s.]+$")
+def valid_email(email):
+    return not email or email_reg_ex.match(email)
+
 
 #setup for main page
 class Index(webapp2.RequestHandler):
     def get(self):
-        #Username form
-        user_username = """
-        <form action="/username" method="post">
+        #signup form
+        user_signup = """
+        <form method="post">
             <label>
                 Username:
                 <input type="text" name="username"/>
             </label>
-        </form>
-        """
-
-        #password setup
-        user_password = """
-        <form action="/password" method="post">
             <label>
                 Password:
                 <input type="password" name="password"/>
             </label>
-        </form>
-        """
-        #password verify
-        user_password_verify = """
-        <form action="/verify" method="post">
             <label>
-                Password:
-                <input type="password" name="user_password_verify"/>
+                Verify Password:
+                <input type="password" name="verify"/>
             </label>
-        </form>
-        """
-        #email setup
-        user_email = """
-        <form action="/email" method="post">
             <label>
                 Email (optional):
-                <input type="text" name="user_email"/>
+                <input type="text" name="email"/>
             </label>
+            <input type='submit'/>
         </form>
         """
-        
-        main_content = user_username + user_password + user_password_verify + user_email
-        content = page_header + main_content + page_footer
+        error = self.request.get("error")
+        error_element = "<p class='error'>" + error + "</p>" if error else ""
 
-        self.response.write(content)
+        content = user_signup + error_element
+
+        self.response.write(buildPage(content))
+
+
+
+    def post(self):
+        user_username = self.request.get("username")
+        user_password = self.request.get("password")
+        user_email = self.request.get("email")
+
+        if not valid_username(user_username):
+            error = "Please enter a valid username"
+            escaped_error = escapeHtml(error)
+            self.redirect("/?error=" + escaped_error)
+
+        elif not valid_password(user_password):
+            error = "Please enter a valid password"
+            escaped_error=escapeHtml(error)
+            self.redirect("/?error=" + escaped_error)
+       
+        elif not valid_email(user_email):
+            error = "Please enter a valid email address"
+            escaped_error=escapeHtml(error)
+            self.redirect("/?error=" + escaped_error)
+
+     
+
+        
 
 app = webapp2.WSGIApplication([
     ('/', Index)
