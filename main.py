@@ -50,13 +50,6 @@ def buildPage(content):
 def escapeHtml(input):
     return cgi.escape(input, quote=True)
 
-#attempting error log with **kwargs
-def errorLog(**kwargs):
-    for key, value in kwargs.items():
-        error = {k:v}
-        return error
-
-
 
 username_reg_ex = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -115,23 +108,23 @@ class Index(webapp2.RequestHandler):
 
 
     def post(self):
-        user_username = self.request.get("username")
-        
+        user_username = self.request.get("username")        
         user_password = self.request.get("password")
+        user_verify = self.request.get("verify")
         user_email = self.request.get("email")
+        has_error = False
 
         if not valid_username(user_username):
-            error = "Please enter a valid username"
-            escaped_error = escapeHtml(error)
-            self.redirect("/?error=" + escaped_error)
+            errorLog('Username':'Please enter a valid username.')
+            escaped_error = escapeHtml(errorLog.Username)
+            has_error = True
 
         elif not valid_password(user_password):
-            error = "Please enter a valid password"
-            escaped_error=escapeHtml(error)
-            self.redirect("/?error=" + escaped_error)
-       
+            errorLog('Password':"Please enter a valid password")
+            escaped_error=escapeHtml(errorLog.Password)
+            has_error = True
         elif not valid_email(user_email):
-            error = "Please enter a valid email address"
+            errorLog('Email':'Please enter a valid email address')
             escaped_error=escapeHtml(error)
             self.redirect("/?error=" + escaped_error)
 
@@ -139,7 +132,11 @@ class Index(webapp2.RequestHandler):
             username_welcome = user_username
             self.redirect("/Welcome?username=%s" % username_welcome)
 
-     
+        #attempting error log with **kwargs
+    def errorLog(**kwargs):
+        for key, value in kwargs.items():
+            error = {key:value}
+            return error
 
         
 
