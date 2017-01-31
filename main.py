@@ -114,29 +114,49 @@ class Index(webapp2.RequestHandler):
         user_email = self.request.get("email")
         has_error = False
 
+        params = dict(username = username,
+                    email = email)
+
         if not valid_username(user_username):
-            errorLog('Username':'Please enter a valid username.')
-            escaped_error = escapeHtml(errorLog.Username)
+            #errorLog(['Username':'Please enter a valid username.'])
+            params['error_username'] = 'Please enter a valid username'
             has_error = True
 
         elif not valid_password(user_password):
-            errorLog('Password':"Please enter a valid password")
-            escaped_error=escapeHtml(errorLog.Password)
+            #errorLog(['Password':"Please enter a valid password"])
+            params['error_password'] = 'Please enter a valid password'
             has_error = True
-        elif not valid_email(user_email):
-            errorLog('Email':'Please enter a valid email address')
-            escaped_error=escapeHtml(error)
-            self.redirect("/?error=" + escaped_error)
 
+        elif user_password != user_verify:
+            #errorLog(['Verify':'Passwords do not match'])
+            params['error_verify'] = 'Passwords do not match.'
+            has_error = True
+
+        elif not valid_email(user_email):
+            #errorLog(['Email':'Please enter a valid email address'])
+            params['error_email'] = 'Please enter a valid email address.'
+            has_error = True
+
+        else:
+            has_error = False
+            username_welcome = user_username
+            self.redirect("/Welcome?username=%s" % username_welcome)
+
+        if has_error == True:
+            fullError = errorLog.Username + errorLog.Password + errorLog.Verify + errorLog.Email
+            escapeError = escapeHtml(fullError)
+            self.redirect("/error" + escapeError)
+            
         else:
             username_welcome = user_username
             self.redirect("/Welcome?username=%s" % username_welcome)
 
+
         #attempting error log with **kwargs
-    def errorLog(**kwargs):
-        for key, value in kwargs.items():
-            error = {key:value}
-            return error
+    #def errorLog(**kwargs):
+    #   for key, value in kwargs.items():
+    #        error = {key:value}
+    #        return error
 
         
 
