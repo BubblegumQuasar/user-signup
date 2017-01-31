@@ -50,6 +50,13 @@ def buildPage(content):
 def escapeHtml(input):
     return cgi.escape(input, quote=True)
 
+#attempting error log with **kwargs
+def errorLog(**kwargs):
+    for key, value in kwargs.items():
+        error = {k:v}
+        return error
+
+
 
 username_reg_ex = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -65,6 +72,13 @@ email_reg_ex = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s.]+$")
 def valid_email(email):
     return not email or email_reg_ex.match(email)
 
+
+class WelcomeHandler(webapp2.RequestHandler):
+    def get(self):
+        username_welcome = self.request.get("username")
+        escaped_UN = escapeHtml(username_welcome)
+        content = "Welcome, " + escaped_UN
+        self.response.write(buildPage(content))
 
 #setup for main page
 class Index(webapp2.RequestHandler):
@@ -102,6 +116,7 @@ class Index(webapp2.RequestHandler):
 
     def post(self):
         user_username = self.request.get("username")
+        
         user_password = self.request.get("password")
         user_email = self.request.get("email")
 
@@ -120,10 +135,15 @@ class Index(webapp2.RequestHandler):
             escaped_error=escapeHtml(error)
             self.redirect("/?error=" + escaped_error)
 
+        else:
+            username_welcome = user_username
+            self.redirect("/Welcome?username=%s" % username_welcome)
+
      
 
         
 
 app = webapp2.WSGIApplication([
-    ('/', Index)
+    ('/', Index),
+    ('/Welcome', WelcomeHandler)
 ], debug=True)
