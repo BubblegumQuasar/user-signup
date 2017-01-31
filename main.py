@@ -145,7 +145,7 @@ class Index(webapp2.RequestHandler):
         if has_error == True:
             #fullError = params.error_username + params.error_password + params.error_verify + params.error_email
             #escapeError = escapeHtml(fullError)
-            error = **params
+            error = str(params.values())
             self.redirect("/?error=" + error)
             
         else:
