@@ -114,8 +114,8 @@ class Index(webapp2.RequestHandler):
         user_email = self.request.get("email")
         has_error = False
 
-        params = dict(username = username,
-                    email = email)
+        params = dict(username = user_username,
+                    email = user_email)
 
         if not valid_username(user_username):
             #errorLog(['Username':'Please enter a valid username.'])
@@ -143,9 +143,10 @@ class Index(webapp2.RequestHandler):
             self.redirect("/Welcome?username=%s" % username_welcome)
 
         if has_error == True:
-            fullError = errorLog.Username + errorLog.Password + errorLog.Verify + errorLog.Email
-            escapeError = escapeHtml(fullError)
-            self.redirect("/error" + escapeError)
+            #fullError = params.error_username + params.error_password + params.error_verify + params.error_email
+            #escapeError = escapeHtml(fullError)
+            error = **params
+            self.redirect("/?error=" + error)
             
         else:
             username_welcome = user_username
