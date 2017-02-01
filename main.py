@@ -18,7 +18,7 @@ import webapp2
 import cgi
 import re
 
-#maybe broke remote. Testing.
+
 
 def buildPage(content):
     # html boilerplate for the top of every page
@@ -35,7 +35,7 @@ def buildPage(content):
     </head>
     <body>
         <h1>
-            User Signup
+        User Signup
         </h1>
     """
     page_body=content
@@ -70,78 +70,109 @@ class WelcomeHandler(webapp2.RequestHandler):
     def get(self):
         username_welcome = self.request.get("username")
         escaped_UN = escapeHtml(username_welcome)
-        content = "Welcome, " + escaped_UN
+        title_skele = ""
+        content =  "<h1> Welcome, " + escaped_UN + "</h1>"
         self.response.write(buildPage(content))
 
 #setup for main page
 class Index(webapp2.RequestHandler):
     def get(self):
-        #signup form
+        error_username = ""
+        error_password = ""
+        error_verify = ""
+        error_email = ""
+        user_name = ""
+        user_email = ""
+
         user_signup = """
         <form method="post">
             <label>
                 Username:
-                <input type="text" name="username"/>
+                <input type="text" name="username" value="%s"/><div class = "error">%s</div>
             </label>
             <label>
                 Password:
-                <input type="password" name="password"/>
+                <input type="password" name="password"/><div class = "error">%s</div>
             </label>
             <label>
                 Verify Password:
-                <input type="password" name="verify"/>
+                <input type="password" name="verify"/><div class = "error">%s</div>
             </label>
             <label>
                 Email (optional):
-                <input type="text" name="email"/>
+                <input type="text" name="email" value="%s"/><div class = "error">%s</div>
             </label>
             <input type='submit'/>
         </form>
-        """
-        error = self.request.get("error")
-        error_element = "<p class='error'>" + error + "</p>" if error else ""
+       """% (user_name, error_username, error_password, error_verify, user_email, error_email)
 
-        content = user_signup + error_element
+
+        content = user_signup
+        title_skele = "User Signup"
 
         self.response.write(buildPage(content))
 
 
 
     def post(self):
+        error_username = ""
+        error_password = ""
+        error_verify = ""
+        error_email = ""
+        user_name = ""
+        user_email = ""
+
         user_username = escapeHtml(self.request.get("username"))        
         user_password = escapeHtml(self.request.get("password"))
         user_verify = escapeHtml(self.request.get("verify"))
-        user_email = escapeHtml(self.request.get("email"))
+        user_email2 = escapeHtml(self.request.get("email"))
         has_error = False
 
         params = dict()
 
         if not valid_username(user_username):
-            #errorLog(['Username':'Please enter a valid username.'])
-            params['error_username'] = 'Please enter a valid username'
+            error_username = 'Please enter a valid username'
             has_error = True
 
         if not valid_password(user_password):
-            #errorLog(['Password':"Please enter a valid password"])
-            params['error_password'] = 'Please enter a valid password'
+            error_password = 'Please enter a valid password'
             has_error = True
 
         if user_password != user_verify:
-            #errorLog(['Verify':'Passwords do not match'])
-            params['error_verify'] = 'Passwords do not match.'
+            error_verify = 'Passwords do not match'
             has_error = True
 
-        if not valid_email(user_email):
-            #errorLog(['Email':'Please enter a valid email address'])
-            params['error_email'] = 'Please enter a valid email address.'
+        if not valid_email(user_email2):
+            error_email = 'Please enter a valid email address'
             has_error = True
 
         if has_error == True:
-            #fullError = params.error_username + params.error_password + params.error_verify + params.error_email
-            #escapeError = escapeHtml(fullError)
-            error = str(params.values())
-            self.redirect("/?error=" + error)
-            
+            user_signup = """
+            <form method="post">
+                <label>
+                    Username:
+                    <input type="text" name="username" value="%s"/><div class = "error">%s</div>
+                </label>
+                <label>
+                    Password:
+                    <input type="password" name="password"/><div class = "error">%s</div>
+                </label>
+                <label>
+                    Verify Password:
+                    <input type="password" name="verify"/><div class = "error">%s</div>
+                </label>
+                <label>
+                    Email (optional):
+                    <input type="text" name="email" value="%s"/><div class = "error">%s</div>
+                </label>
+                <input type='submit'/>
+            </form>
+        """% (user_name, error_username, error_password, error_verify, user_email, error_email)
+            title_skele = "User Signup"
+            content = user_signup
+
+            self.response.write(buildPage(content))
+
         else:
             username_welcome = user_username
             self.redirect("/Welcome?username=%s" % username_welcome)
