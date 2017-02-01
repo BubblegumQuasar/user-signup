@@ -108,10 +108,10 @@ class Index(webapp2.RequestHandler):
 
 
     def post(self):
-        user_username = self.request.get("username")        
-        user_password = self.request.get("password")
-        user_verify = self.request.get("verify")
-        user_email = self.request.get("email")
+        user_username = escapeHtml(self.request.get("username"))        
+        user_password = escapeHtml(self.request.get("password"))
+        user_verify = escapeHtml(self.request.get("verify"))
+        user_email = escapeHtml(self.request.get("email"))
         has_error = False
 
         params = dict()
