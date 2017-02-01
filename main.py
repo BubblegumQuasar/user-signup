@@ -70,9 +70,32 @@ class WelcomeHandler(webapp2.RequestHandler):
     def get(self):
         username_welcome = self.request.get("username")
         escaped_UN = escapeHtml(username_welcome)
-        title_skele = ""
-        content =  "<h1> Welcome, " + escaped_UN + "</h1>"
-        self.response.write(buildPage(content))
+
+        page_body=  "<h1> Welcome, " + escaped_UN + "</h1>"
+        page_header = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>User Signup</title>
+            <style type="text/css">
+                .error {
+                    color: red;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>
+            
+            </h1>
+        """
+        
+        # html boilerplate for the bottom of every page
+        page_footer = """
+        </body>
+        </html>
+        """
+        content = page_header + page_body + page_footer
+        self.response.write(content)
 
 #setup for main page
 class Index(webapp2.RequestHandler):
@@ -108,7 +131,6 @@ class Index(webapp2.RequestHandler):
 
 
         content = user_signup
-        title_skele = "User Signup"
 
         self.response.write(buildPage(content))
 
@@ -168,7 +190,6 @@ class Index(webapp2.RequestHandler):
                 <input type='submit'/>
             </form>
         """% (user_name, error_username, error_password, error_verify, user_email, error_email)
-            title_skele = "User Signup"
             content = user_signup
 
             self.response.write(buildPage(content))
@@ -178,11 +199,6 @@ class Index(webapp2.RequestHandler):
             self.redirect("/Welcome?username=%s" % username_welcome)
 
 
-        #attempting error log with **kwargs
-    #def errorLog(**kwargs):
-    #   for key, value in kwargs.items():
-    #        error = {key:value}
-    #        return error
 
         
 
